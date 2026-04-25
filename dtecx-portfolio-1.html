@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DTECX — Web Development Studio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #F5F3EF; --dark: #0F0F0F; --dark2: #1A1A1A;
+      --accent: #1A1A1A; --accent2: #E8E4DC;
+      --blue: #1A56DB; --blue2: #3B82F6;
+      --muted: #888; --border: #E0DDD8;
+      --text: #1A1A1A;
+    }
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Outfit', sans-serif; background: var(--bg); color: var(--text); overflow-x: hidden; cursor: none; }
+
+    /* CUSTOM CURSOR */
+    .cursor { width: 10px; height: 10px; background: var(--dark); border-radius: 50%; position: fixed; pointer-events: none; z-index: 9999; transition: transform 0.15s; transform: translate(-50%, -50%); }
+    .cursor-ring { width: 36px; height: 36px; border: 1.5px solid var(--dark); border-radius: 50%; position: fixed; pointer-events: none; z-index: 9998; transition: transform 0.1s, width 0.3s, height 0.3s, opacity 0.3s; transform: translate(-50%, -50%); }
+
+    /* NAVBAR */
+    .nav { position: fixed; top: 0; left: 0; right: 0; z-index: 100; display: flex; justify-content: space-between; align-items: center; padding: 24px 60px; background: rgba(245,243,239,0.92); backdrop-filter: blur(16px); border-bottom: 1px solid var(--border); }
+    .nav-logo { font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 800; letter-spacing: 4px; text-transform: uppercase; color: var(--dark); }
+    .nav-logo span { color: var(--blue); }
+    .nav-links { display: flex; gap: 36px; list-style: none; }
+    .nav-links a { font-size: 0.82rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); text-decoration: none; transition: color 0.3s; }
+    .nav-links a:hover { color: var(--dark); }
+    .nav-cta { background: var(--dark); color: white; padding: 10px 24px; border-radius: 100px; font-size: 0.78rem; letter-spacing: 1.5px; text-transform: uppercase; text-decoration: none; transition: background 0.3s, transform 0.2s; }
+    .nav-cta:hover { background: var(--blue); transform: translateY(-1px); }
+
+    /* HERO */
+    .hero { min-height: 100vh; display: flex; align-items: center; padding: 120px 60px 80px; position: relative; overflow: hidden; }
+    .hero-bg { position: absolute; top: -100px; right: -100px; width: 600px; height: 600px; background: radial-gradient(circle, rgba(26,86,219,0.08) 0%, transparent 70%); border-radius: 50%; }
+    .hero-grid { position: absolute; inset: 0; background-image: linear-gradient(var(--border) 1px, transparent 1px), linear-gradient(90deg, var(--border) 1px, transparent 1px); background-size: 60px 60px; opacity: 0.5; }
+    .hero-content { position: relative; z-index: 2; max-width: 900px; }
+    .hero-tag { display: inline-flex; align-items: center; gap: 8px; background: white; border: 1px solid var(--border); border-radius: 100px; padding: 8px 18px; font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); margin-bottom: 36px; animation: fadeUp 0.8s ease both; }
+    .hero-tag::before { content: ''; width: 8px; height: 8px; background: var(--blue); border-radius: 50%; animation: pulse 2s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .hero h1 { font-family: 'Syne', sans-serif; font-size: clamp(3rem, 8vw, 7rem); font-weight: 800; line-height: 0.95; letter-spacing: -2px; margin-bottom: 28px; animation: fadeUp 0.8s 0.1s ease both; }
+    .hero h1 em { font-style: normal; color: var(--blue); }
+    .hero p { font-size: 1.15rem; color: var(--muted); max-width: 520px; line-height: 1.8; margin-bottom: 48px; animation: fadeUp 0.8s 0.2s ease both; }
+    .hero-btns { display: flex; gap: 16px; flex-wrap: wrap; animation: fadeUp 0.8s 0.3s ease both; }
+    .btn-primary { background: var(--dark); color: white; padding: 16px 36px; border-radius: 100px; font-size: 0.88rem; letter-spacing: 1px; text-transform: uppercase; text-decoration: none; transition: background 0.3s, transform 0.2s; }
+    .btn-primary:hover { background: var(--blue); transform: translateY(-2px); }
+    .btn-outline { background: transparent; color: var(--dark); padding: 16px 36px; border-radius: 100px; border: 1.5px solid var(--dark); font-size: 0.88rem; letter-spacing: 1px; text-transform: uppercase; text-decoration: none; transition: all 0.3s; }
+    .btn-outline:hover { background: var(--dark); color: white; transform: translateY(-2px); }
+    .hero-stats { position: absolute; right: 60px; bottom: 80px; display: flex; gap: 48px; animation: fadeUp 0.8s 0.4s ease both; }
+    .stat-num { font-family: 'Syne', sans-serif; font-size: 2.2rem; font-weight: 800; color: var(--dark); line-height: 1; }
+    .stat-label { font-size: 0.75rem; color: var(--muted); letter-spacing: 1px; text-transform: uppercase; margin-top: 4px; }
+
+    /* MARQUEE */
+    .marquee-wrap { background: var(--dark); padding: 18px 0; overflow: hidden; }
+    .marquee { display: flex; gap: 0; animation: marquee 20s linear infinite; white-space: nowrap; }
+    .marquee-item { font-family: 'Syne', sans-serif; font-size: 0.78rem; letter-spacing: 3px; text-transform: uppercase; color: rgba(255,255,255,0.5); padding: 0 32px; }
+    .marquee-item span { color: var(--blue2); margin-right: 32px; }
+    @keyframes marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+    /* SECTION */
+    .section { padding: 120px 60px; }
+    .section-tag { font-size: 0.72rem; letter-spacing: 3px; text-transform: uppercase; color: var(--blue); margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
+    .section-tag::before { content: ''; width: 24px; height: 1px; background: var(--blue); }
+    .section-title { font-family: 'Syne', sans-serif; font-size: clamp(2rem, 4vw, 3.5rem); font-weight: 800; letter-spacing: -1px; line-height: 1.1; margin-bottom: 60px; }
+
+    /* SERVICES */
+    .services-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1px; background: var(--border); border: 1px solid var(--border); }
+    .service-card { background: var(--bg); padding: 48px 40px; transition: background 0.3s; }
+    .service-card:hover { background: var(--dark); color: white; }
+    .service-card:hover .service-desc { color: rgba(255,255,255,0.6); }
+    .service-card:hover .service-num { color: rgba(255,255,255,0.2); }
+    .service-num { font-family: 'Syne', sans-serif; font-size: 3rem; font-weight: 800; color: var(--border); line-height: 1; margin-bottom: 24px; transition: color 0.3s; }
+    .service-icon { font-size: 2rem; margin-bottom: 16px; }
+    .service-name { font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 700; margin-bottom: 12px; }
+    .service-desc { font-size: 0.88rem; color: var(--muted); line-height: 1.7; transition: color 0.3s; }
+
+    /* PROJECTS */
+    .projects-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap: 24px; }
+    .project-card { background: white; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; transition: transform 0.3s, box-shadow 0.3s; }
+    .project-card:hover { transform: translateY(-6px); box-shadow: 0 20px 60px rgba(0,0,0,0.1); }
+    .project-img { height: 200px; display: flex; align-items: center; justify-content: center; font-size: 4rem; position: relative; overflow: hidden; }
+    .project-body { padding: 28px; }
+    .project-tag { display: inline-block; background: var(--accent2); color: var(--dark); font-size: 0.68rem; letter-spacing: 1.5px; text-transform: uppercase; padding: 4px 12px; border-radius: 100px; margin-bottom: 12px; }
+    .project-name { font-family: 'Syne', sans-serif; font-size: 1.2rem; font-weight: 700; margin-bottom: 10px; }
+    .project-desc { font-size: 0.85rem; color: var(--muted); line-height: 1.6; margin-bottom: 20px; }
+    .project-link { font-size: 0.78rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--blue); text-decoration: none; display: flex; align-items: center; gap: 6px; transition: gap 0.2s; }
+    .project-link:hover { gap: 12px; }
+
+    /* PROCESS */
+    .process-steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0; }
+    .process-step { padding: 40px 32px; border-right: 1px solid var(--border); position: relative; }
+    .process-step:last-child { border-right: none; }
+    .step-num { font-family: 'Syne', sans-serif; font-size: 3.5rem; font-weight: 800; color: var(--border); line-height: 1; margin-bottom: 20px; }
+    .step-name { font-family: 'Syne', sans-serif; font-size: 1.05rem; font-weight: 700; margin-bottom: 10px; }
+    .step-desc { font-size: 0.83rem; color: var(--muted); line-height: 1.6; }
+
+    /* PRICING */
+    .pricing-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+    .pricing-card { background: white; border: 1px solid var(--border); border-radius: 8px; padding: 40px; transition: transform 0.3s; }
+    .pricing-card:hover { transform: translateY(-4px); }
+    .pricing-card.featured { background: var(--dark); color: white; border-color: var(--dark); }
+    .pricing-card.featured .pricing-desc, .pricing-card.featured .pricing-feature { color: rgba(255,255,255,0.6); }
+    .pricing-card.featured .pricing-feature::before { background: var(--blue2); }
+    .pricing-badge { display: inline-block; background: var(--blue); color: white; font-size: 0.65rem; letter-spacing: 2px; text-transform: uppercase; padding: 4px 12px; border-radius: 100px; margin-bottom: 20px; }
+    .pricing-name { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 8px; }
+    .pricing-desc { font-size: 0.82rem; color: var(--muted); margin-bottom: 24px; }
+    .pricing-price { font-family: 'Syne', sans-serif; font-size: 2.5rem; font-weight: 800; line-height: 1; margin-bottom: 6px; }
+    .pricing-unit { font-size: 0.75rem; color: var(--muted); margin-bottom: 28px; }
+    .pricing-features { list-style: none; margin-bottom: 32px; }
+    .pricing-feature { font-size: 0.83rem; color: var(--muted); padding: 7px 0; display: flex; align-items: center; gap: 10px; }
+    .pricing-feature::before { content: ''; width: 6px; height: 6px; background: var(--dark); border-radius: 50%; flex-shrink: 0; }
+    .pricing-btn { display: block; text-align: center; padding: 14px; border-radius: 100px; font-size: 0.82rem; letter-spacing: 1.5px; text-transform: uppercase; text-decoration: none; transition: all 0.3s; }
+    .pricing-btn-dark { background: var(--dark); color: white; }
+    .pricing-btn-dark:hover { background: var(--blue); }
+    .pricing-btn-light { background: white; color: var(--dark); }
+    .pricing-btn-light:hover { background: var(--blue); color: white; }
+
+    /* CONTACT */
+    .contact-wrap { display: grid; grid-template-columns: 1fr 1fr; gap: 80px; align-items: start; }
+    .contact-info h2 { font-family: 'Syne', sans-serif; font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; letter-spacing: -1px; line-height: 1.1; margin-bottom: 24px; }
+    .contact-info p { font-size: 0.95rem; color: var(--muted); line-height: 1.8; margin-bottom: 36px; }
+    .contact-detail { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; font-size: 0.88rem; }
+    .contact-detail-icon { width: 40px; height: 40px; background: var(--dark); color: white; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1rem; flex-shrink: 0; }
+    .contact-form { background: white; border: 1px solid var(--border); border-radius: 12px; padding: 40px; }
+    .form-field { margin-bottom: 16px; }
+    .form-field label { display: block; font-size: 0.7rem; letter-spacing: 1.5px; text-transform: uppercase; color: var(--muted); margin-bottom: 6px; }
+    .form-field input, .form-field textarea, .form-field select { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 12px 14px; font-family: 'Outfit', sans-serif; font-size: 0.9rem; color: var(--text); outline: none; transition: border-color 0.2s; }
+    .form-field input:focus, .form-field textarea:focus, .form-field select:focus { border-color: var(--blue); }
+    .form-field textarea { resize: vertical; min-height: 100px; }
+    .form-submit { width: 100%; background: var(--dark); color: white; border: none; border-radius: 100px; padding: 15px; font-family: 'Outfit', sans-serif; font-size: 0.85rem; letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer; transition: background 0.3s; margin-top: 8px; }
+    .form-submit:hover { background: var(--blue); }
+
+    /* FOOTER */
+    footer { background: var(--dark); color: white; padding: 60px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 24px; }
+    .footer-logo { font-family: 'Syne', sans-serif; font-size: 1.3rem; font-weight: 800; letter-spacing: 4px; }
+    .footer-logo span { color: var(--blue2); }
+    .footer-text { font-size: 0.78rem; color: rgba(255,255,255,0.4); }
+    .footer-links { display: flex; gap: 24px; }
+    .footer-links a { font-size: 0.78rem; color: rgba(255,255,255,0.4); text-decoration: none; letter-spacing: 1px; text-transform: uppercase; transition: color 0.2s; }
+    .footer-links a:hover { color: white; }
+
+    /* WA FLOAT */
+    .wa-float { position: fixed; bottom: 32px; right: 32px; background: #25D366; color: white; width: 56px; height: 56px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; text-decoration: none; box-shadow: 0 4px 20px rgba(37,211,102,0.4); z-index: 200; transition: transform 0.3s; }
+    .wa-float:hover { transform: scale(1.1); }
+
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* WELCOME SPLASH */
+    .splash {
+      position: fixed; inset: 0; z-index: 10000;
+      background: #0F0F0F;
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column;
+      animation: splashFade 0.6s ease 3.2s forwards;
+    }
+    @keyframes splashFade {
+      to { opacity: 0; pointer-events: none; visibility: hidden; }
+    }
+    .splash-text {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2.5rem, 10vw, 6rem);
+      font-weight: 800;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      white-space: nowrap;
+      background: linear-gradient(90deg, #ff6b6b, #ffd93d, #6bcb77, #4d96ff, #c77dff, #ff6b6b);
+      background-size: 300% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      animation: colorSlide 1.5s linear infinite, textPop 0.8s cubic-bezier(0.175,0.885,0.32,1.275) both;
+    }
+    @keyframes colorSlide {
+      to { background-position: 300% center; }
+    }
+    @keyframes textPop {
+      0% { opacity: 0; transform: scale(0.5) translateY(30px); }
+      100% { opacity: 1; transform: scale(1) translateY(0); }
+    }
+    .splash-sub {
+      font-family: 'Outfit', sans-serif;
+      font-size: clamp(0.75rem, 3vw, 1rem);
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.4);
+      margin-top: 16px;
+      animation: fadeInUp 0.8s 0.5s ease both;
+    }
+    .splash-dots {
+      display: flex; gap: 8px; margin-top: 40px;
+      animation: fadeInUp 0.8s 0.8s ease both;
+    }
+    .splash-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      animation: dotBounce 0.6s ease infinite alternate;
+    }
+    .splash-dot:nth-child(1) { background: #ff6b6b; animation-delay: 0s; }
+    .splash-dot:nth-child(2) { background: #ffd93d; animation-delay: 0.15s; }
+    .splash-dot:nth-child(3) { background: #6bcb77; animation-delay: 0.3s; }
+    .splash-dot:nth-child(4) { background: #4d96ff; animation-delay: 0.45s; }
+    .splash-dot:nth-child(5) { background: #c77dff; animation-delay: 0.6s; }
+    @keyframes dotBounce {
+      from { transform: translateY(0); opacity: 0.4; }
+      to { transform: translateY(-10px); opacity: 1; }
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* HAMBURGER MENU */
+    .hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; padding: 4px; }
+    .hamburger span { width: 24px; height: 2px; background: var(--dark); border-radius: 2px; transition: all 0.3s; display: block; }
+    .mobile-menu { display: none; position: fixed; inset: 0; background: rgba(245,243,239,0.98); z-index: 99; flex-direction: column; align-items: center; justify-content: center; gap: 32px; }
+    .mobile-menu.open { display: flex; }
+    .mobile-menu a { font-family: "Syne", sans-serif; font-size: 1.8rem; font-weight: 800; color: var(--dark); text-decoration: none; letter-spacing: 2px; text-transform: uppercase; }
+    .mobile-menu a:hover { color: var(--blue); }
+    .mobile-close { position: absolute; top: 24px; right: 24px; background: none; border: none; font-size: 1.8rem; cursor: pointer; color: var(--dark); }
+
+    @media (max-width: 768px) {
+      .nav { padding: 16px 20px; }
+      .nav-links { display: none; }
+      .nav-cta { display: none; }
+      .hamburger { display: flex; }
+      .hero { padding: 110px 20px 60px; min-height: auto; }
+      .hero-content { max-width: 100%; }
+      .hero h1 { font-size: clamp(2.4rem, 10vw, 4rem); letter-spacing: -1px; }
+      .hero p { font-size: 1rem; }
+      .hero-btns { flex-direction: column; gap: 12px; }
+      .btn-primary, .btn-outline { text-align: center; padding: 14px 28px; }
+      .hero-stats { position: static; margin-top: 36px; flex-wrap: wrap; gap: 24px; }
+      .section { padding: 70px 20px; }
+      .section-title { font-size: clamp(1.8rem, 6vw, 2.5rem); margin-bottom: 36px; }
+      .services-grid { grid-template-columns: 1fr; }
+      .service-card { padding: 32px 24px; }
+      .projects-grid { grid-template-columns: 1fr; }
+      .process-steps { grid-template-columns: 1fr 1fr; }
+      .process-step { border-right: none; border-bottom: 1px solid var(--border); padding: 28px 20px; }
+      .process-steps .process-step:nth-child(odd) { border-right: 1px solid var(--border); }
+      .pricing-grid { grid-template-columns: 1fr; }
+      .pricing-card { padding: 28px 24px; }
+      .contact-wrap { grid-template-columns: 1fr; gap: 36px; }
+      .contact-form { padding: 28px 20px; }
+      .marquee-item { font-size: 0.72rem; padding: 0 20px; }
+      footer { padding: 36px 20px; flex-direction: column; text-align: center; gap: 16px; }
+      .footer-links { flex-wrap: wrap; justify-content: center; }
+      body { cursor: auto; }
+      .cursor, .cursor-ring { display: none; }
+      .wa-float { bottom: 20px; right: 20px; width: 48px; height: 48px; font-size: 1.3rem; }
+    }
+
+    @media (max-width: 400px) {
+      .hero h1 { font-size: 2.2rem; }
+      .process-steps { grid-template-columns: 1fr; }
+      .process-step { border-right: none !important; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- WELCOME SPLASH -->
+<div class="splash" id="splash">
+  <div class="splash-text">Welcome to DTECX</div>
+  <div class="splash-sub">Web Development Studio</div>
+  <div class="splash-dots">
+    <div class="splash-dot"></div>
+    <div class="splash-dot"></div>
+    <div class="splash-dot"></div>
+    <div class="splash-dot"></div>
+    <div class="splash-dot"></div>
+  </div>
+</div>
+
+<div class="cursor" id="cursor"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+
+<!-- NAVBAR -->
+<nav class="nav">
+  <div class="nav-logo">DTE<span>C</span>X</div>
+  <ul class="nav-links">
+    <li><a href="#services">Services</a></li>
+    <li><a href="#work">Work</a></li>
+    <li><a href="#pricing">Pricing</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <a href="#contact" class="nav-cta">Get a Quote</a>
+  <div class="hamburger" onclick="openMenu()">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <button class="mobile-close" onclick="closeMenu()">✕</button>
+  <a href="#services" onclick="closeMenu()">Services</a>
+  <a href="#work" onclick="closeMenu()">Work</a>
+  <a href="#pricing" onclick="closeMenu()">Pricing</a>
+  <a href="#contact" onclick="closeMenu()">Contact</a>
+  <a href="#contact" onclick="closeMenu()" style="color:var(--blue)">Get a Quote →</a>
+</div>
+
+<!-- HERO -->
+<section class="hero" id="home">
+  <div class="hero-bg"></div>
+  <div class="hero-grid"></div>
+  <div class="hero-content">
+    <div class="hero-tag">Available for projects</div>
+    <h1>We Build<br/><em>Websites</em><br/>That Work</h1>
+    <p>DTECX delivers professional websites and portfolios for businesses, brands, and individuals across Nigeria. Clean, fast, and built to convert.</p>
+    <div class="hero-btns">
+      <a href="#work" class="btn-primary">View Our Work</a>
+      <a href="#contact" class="btn-outline">Start a Project</a>
+    </div>
+  </div>
+  <div class="hero-stats">
+    <div>
+      <div class="stat-num">3+</div>
+      <div class="stat-label">Projects Done</div>
+    </div>
+    <div>
+      <div class="stat-num">100%</div>
+      <div class="stat-label">Client Satisfaction</div>
+    </div>
+    <div>
+      <div class="stat-num">24h</div>
+      <div class="stat-label">Response Time</div>
+    </div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee">
+    <div class="marquee-item"><span>✦</span> Web Development</div>
+    <div class="marquee-item"><span>✦</span> Portfolio Sites</div>
+    <div class="marquee-item"><span>✦</span> Business Websites</div>
+    <div class="marquee-item"><span>✦</span> E-Commerce</div>
+    <div class="marquee-item"><span>✦</span> Landing Pages</div>
+    <div class="marquee-item"><span>✦</span> GitHub Hosting</div>
+    <div class="marquee-item"><span>✦</span> Mobile Friendly</div>
+    <div class="marquee-item"><span>✦</span> Fast Delivery</div>
+    <div class="marquee-item"><span>✦</span> Web Development</div>
+    <div class="marquee-item"><span>✦</span> Portfolio Sites</div>
+    <div class="marquee-item"><span>✦</span> Business Websites</div>
+    <div class="marquee-item"><span>✦</span> E-Commerce</div>
+    <div class="marquee-item"><span>✦</span> Landing Pages</div>
+    <div class="marquee-item"><span>✦</span> GitHub Hosting</div>
+    <div class="marquee-item"><span>✦</span> Mobile Friendly</div>
+    <div class="marquee-item"><span>✦</span> Fast Delivery</div>
+  </div>
+</div>
+
+<!-- SERVICES -->
+<section class="section" id="services" style="background: white;">
+  <div class="section-tag">What We Do</div>
+  <div class="section-title">Services Built<br/>for Your Goals</div>
+  <div class="services-grid">
+    <div class="service-card">
+      <div class="service-num">01</div>
+      <div class="service-icon">🌐</div>
+      <div class="service-name">Business Websites</div>
+      <div class="service-desc">Professional landing pages and business sites that represent your brand and turn visitors into customers.</div>
+    </div>
+    <div class="service-card">
+      <div class="service-num">02</div>
+      <div class="service-icon">🗂️</div>
+      <div class="service-name">Portfolio Sites</div>
+      <div class="service-desc">Clean, impressive portfolios for freelancers, creatives, and professionals looking to stand out online.</div>
+    </div>
+    <div class="service-card">
+      <div class="service-num">03</div>
+      <div class="service-icon">🛒</div>
+      <div class="service-name">E-Commerce</div>
+      <div class="service-desc">Order-enabled websites with WhatsApp integration so customers can browse, order, and pay seamlessly.</div>
+    </div>
+    <div class="service-card">
+      <div class="service-num">04</div>
+      <div class="service-icon">📄</div>
+      <div class="service-name">Invoice Tools</div>
+      <div class="service-desc">Custom invoice generators and business tools that automate your daily operations and save you time.</div>
+    </div>
+  </div>
+</section>
+
+<!-- WORK -->
+<section class="section" id="work">
+  <div class="section-tag">Our Work</div>
+  <div class="section-title">Recent Projects</div>
+  <div class="projects-grid">
+    <div class="project-card">
+      <div class="project-img" style="background: linear-gradient(135deg, #0D0D0D 0%, #1A1A1A 100%);">🥤</div>
+      <div class="project-body">
+        <span class="project-tag">E-Commerce</span>
+        <div class="project-name">Emerson Global Enterprises</div>
+        <div class="project-desc">Full beverage wholesale website with cart system, WhatsApp ordering, and OPay payment integration. CAC registered business.</div>
+        <a href="https://prinzlehmuyel.github.io/Emersonglobal" target="_blank" class="project-link">View Live Site →</a>
+      </div>
+    </div>
+    <div class="project-card">
+      <div class="project-img" style="background: linear-gradient(135deg, #1A1A1A 0%, #2A2A2A 100%);">📄</div>
+      <div class="project-body">
+        <span class="project-tag">Business Tool</span>
+        <div class="project-name">Emerson Invoice Generator</div>
+        <div class="project-desc">Professional invoice generator with live preview, sales log, daily tracking, and CSV export for Excel.</div>
+        <a href="https://prinzlehmuyel.github.io/Emersoninvoice" target="_blank" class="project-link">View Live Site →</a>
+      </div>
+    </div>
+    <div class="project-card">
+      <div class="project-img" style="background: linear-gradient(135deg, #1A56DB 0%, #3B82F6 100%);">💼</div>
+      <div class="project-body">
+        <span class="project-tag">Portfolio</span>
+        <div class="project-name">Your Project Here</div>
+        <div class="project-desc">We're ready to build your next website. Contact us today and let's bring your vision to life.</div>
+        <a href="#contact" class="project-link">Start a Project →</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROCESS -->
+<section class="section" style="background: white; padding-top: 80px; padding-bottom: 80px;">
+  <div style="max-width: 1200px; margin: 0 auto;">
+    <div class="section-tag">How We Work</div>
+    <div class="section-title" style="margin-bottom: 40px;">Simple Process,<br/>Great Results</div>
+    <div class="process-steps">
+      <div class="process-step">
+        <div class="step-num">01</div>
+        <div class="step-name">Discovery</div>
+        <div class="step-desc">We discuss your goals, brand, and what you need from your website.</div>
+      </div>
+      <div class="process-step">
+        <div class="step-num">02</div>
+        <div class="step-name">Design</div>
+        <div class="step-desc">We create a design that matches your brand and speaks to your audience.</div>
+      </div>
+      <div class="process-step">
+        <div class="step-num">03</div>
+        <div class="step-name">Build</div>
+        <div class="step-desc">We build your site with clean code — fast, mobile-friendly, and ready to launch.</div>
+      </div>
+      <div class="process-step">
+        <div class="step-num">04</div>
+        <div class="step-name">Launch</div>
+        <div class="step-desc">We deploy your site live and hand it over — free hosting included.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="section" id="pricing">
+  <div class="section-tag">Pricing</div>
+  <div class="section-title">Transparent,<br/>Affordable Rates</div>
+  <div class="pricing-grid">
+    <div class="pricing-card">
+      <div class="pricing-name">Starter</div>
+      <div class="pricing-desc">Perfect for individuals and small businesses</div>
+      <div class="pricing-price">₦30,000</div>
+      <div class="pricing-unit">one-time payment</div>
+      <ul class="pricing-features">
+        <li class="pricing-feature">Landing page (1 page)</li>
+        <li class="pricing-feature">Mobile friendly design</li>
+        <li class="pricing-feature">Contact/WhatsApp button</li>
+        <li class="pricing-feature">Free GitHub hosting</li>
+        <li class="pricing-feature">Delivered in 3 days</li>
+      </ul>
+      <a href="#contact" class="pricing-btn pricing-btn-dark">Get Started</a>
+    </div>
+    <div class="pricing-card featured">
+      <div class="pricing-badge">Most Popular</div>
+      <div class="pricing-name">Business</div>
+      <div class="pricing-desc">For businesses that need more features</div>
+      <div class="pricing-price">₦70,000</div>
+      <div class="pricing-unit">one-time payment</div>
+      <ul class="pricing-features">
+        <li class="pricing-feature">Multi-page website</li>
+        <li class="pricing-feature">Cart + WhatsApp ordering</li>
+        <li class="pricing-feature">Payment info integration</li>
+        <li class="pricing-feature">Free GitHub hosting</li>
+        <li class="pricing-feature">Invoice tool included</li>
+        <li class="pricing-feature">Delivered in 5 days</li>
+      </ul>
+      <a href="#contact" class="pricing-btn pricing-btn-light">Get Started</a>
+    </div>
+    <div class="pricing-card">
+      <div class="pricing-name">Portfolio</div>
+      <div class="pricing-desc">For creatives and professionals</div>
+      <div class="pricing-price">₦40,000</div>
+      <div class="pricing-unit">one-time payment</div>
+      <ul class="pricing-features">
+        <li class="pricing-feature">Professional portfolio site</li>
+        <li class="pricing-feature">Projects showcase</li>
+        <li class="pricing-feature">About + Contact sections</li>
+        <li class="pricing-feature">Free GitHub hosting</li>
+        <li class="pricing-feature">Delivered in 4 days</li>
+      </ul>
+      <a href="#contact" class="pricing-btn pricing-btn-dark">Get Started</a>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT -->
+<section class="section" id="contact" style="background: white;">
+  <div class="contact-wrap" style="max-width: 1100px; margin: 0 auto;">
+    <div class="contact-info">
+      <div class="section-tag">Contact</div>
+      <h2>Let's Build Something Great Together</h2>
+      <p>Ready to get your website? Fill the form and we'll get back to you within 24 hours with a plan and quote.</p>
+      <div class="contact-detail">
+        <div class="contact-detail-icon">📱</div>
+        <div>
+          <div style="font-size:0.7rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px">WhatsApp</div>
+          <div style="font-weight:500">+234 816 800 6062</div>
+        </div>
+      </div>
+      <div class="contact-detail">
+        <div class="contact-detail-icon">🌐</div>
+        <div>
+          <div style="font-size:0.7rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:2px">Website</div>
+          <div style="font-weight:500">dtecx.github.io</div>
+        </div>
+      </div>
+    </div>
+    <div class="contact-form">
+      <div class="form-field">
+        <label>Full Name</label>
+        <input type="text" placeholder="e.g. Aisha Mohammed"/>
+      </div>
+      <div class="form-field">
+        <label>Phone / WhatsApp</label>
+        <input type="tel" placeholder="e.g. 08012345678"/>
+      </div>
+      <div class="form-field">
+        <label>Service Needed</label>
+        <select>
+          <option value="">Select a service</option>
+          <option>Business Website</option>
+          <option>E-Commerce Site</option>
+          <option>Portfolio Site</option>
+          <option>Invoice Tool</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label>Tell us about your project</label>
+        <textarea placeholder="Describe what you need..."></textarea>
+      </div>
+      <button class="form-submit" onclick="sendToWhatsApp()">Send Message →</button>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-logo">DTE<span>C</span>X</div>
+  <div class="footer-text">© 2026 DTECX. All rights reserved.</div>
+  <div class="footer-links">
+    <a href="#services">Services</a>
+    <a href="#work">Work</a>
+    <a href="#pricing">Pricing</a>
+    <a href="#contact">Contact</a>
+  </div>
+</footer>
+
+<!-- WHATSAPP FLOAT -->
+<a href="https://wa.me/2348168006062" target="_blank" class="wa-float">💬</a>
+
+<script>
+  // WELCOME SPLASH - show only on first visit per session
+  (function() {
+    const splash = document.getElementById('splash');
+    if (sessionStorage.getItem('dtecx_visited')) {
+      splash.style.display = 'none';
+    } else {
+      sessionStorage.setItem('dtecx_visited', '1');
+      setTimeout(() => { splash.style.display = 'none'; }, 3800);
+    }
+  })();
+
+  // Mobile menu
+  function openMenu() { document.getElementById('mobileMenu').classList.add('open'); }
+  function closeMenu() { document.getElementById('mobileMenu').classList.remove('open'); }
+
+  // Custom cursor
+  const cursor = document.getElementById('cursor');
+  const ring = document.getElementById('cursorRing');
+  let mouseX = 0, mouseY = 0, ringX = 0, ringY = 0;
+
+  document.addEventListener('mousemove', e => {
+    mouseX = e.clientX; mouseY = e.clientY;
+    cursor.style.left = mouseX + 'px';
+    cursor.style.top = mouseY + 'px';
+  });
+
+  function animateRing() {
+    ringX += (mouseX - ringX) * 0.12;
+    ringY += (mouseY - ringY) * 0.12;
+    ring.style.left = ringX + 'px';
+    ring.style.top = ringY + 'px';
+    requestAnimationFrame(animateRing);
+  }
+  animateRing();
+
+  document.querySelectorAll('a, button').forEach(el => {
+    el.addEventListener('mouseenter', () => { ring.style.width = '60px'; ring.style.height = '60px'; ring.style.opacity = '0.5'; });
+    el.addEventListener('mouseleave', () => { ring.style.width = '36px'; ring.style.height = '36px'; ring.style.opacity = '1'; });
+  });
+
+  // Contact form WhatsApp
+  function sendToWhatsApp() {
+    const name = document.querySelector('.contact-form input[type="text"]').value.trim();
+    const phone = document.querySelector('.contact-form input[type="tel"]').value.trim();
+    const service = document.querySelector('.contact-form select').value;
+    const message = document.querySelector('.contact-form textarea').value.trim();
+
+    if (!name || !phone || !service) { alert('Please fill in your name, phone, and service needed.'); return; }
+
+    const msg = `Hi DTECX! 👋\n\n*Name:* ${name}\n*Phone:* ${phone}\n*Service:* ${service}\n*Project Details:* ${message || 'N/A'}\n\nI'd like to get a quote for my website.`;
+    window.open(`https://wa.me/2348168006062?text=${encodeURIComponent(msg)}`, '_blank');
+  }
+</script>
+</body>
+</html>
